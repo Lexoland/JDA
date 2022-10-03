@@ -67,6 +67,7 @@ import net.dv8tion.jda.internal.requests.DeferredRestAction;
 import net.dv8tion.jda.internal.utils.Checks;
 import net.dv8tion.jda.internal.utils.Helpers;
 import net.dv8tion.jda.internal.utils.concurrent.task.GatewayTask;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -103,6 +104,16 @@ public interface Guild extends IGuildChannelContainer, ISnowflake
      * @return The holder or null if no holder factory is set.
      */
     Holder getHolder();
+
+    /**
+     * Localizes the given key depending on the guild's locale. This localization defaults to {@link DiscordLocale#ENGLISH_US} if the guild is not a community server.
+     * @param key The key to localize
+     * @param values The values to replace in the localized string
+     * @throws IllegalStateException If the {@link dev.lexoland.jda.api.LanguageManager} is not initialized
+     * @return The localized string
+     */
+    @NotNull
+    String tl(@NotNull String key, Object... values);
     // Lexoland end
 
     /**

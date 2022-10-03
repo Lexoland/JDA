@@ -16,6 +16,7 @@
 
 package net.dv8tion.jda.api.interactions.commands.build;
 
+import dev.lexoland.jda.api.LanguageManager;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.utils.data.DataArray;
 import net.dv8tion.jda.api.utils.data.DataObject;
@@ -71,7 +72,10 @@ public class Commands
     @Nonnull
     public static SlashCommandData slash(@Nonnull String name, @Nonnull String description)
     {
-        return new CommandDataImpl(name, description);
+        CommandDataImpl commandData = new CommandDataImpl(name, description);
+        if(LanguageManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LanguageManager.INSTANCE);
+        return commandData;
     }
 
     /**
@@ -88,7 +92,10 @@ public class Commands
     @Nonnull
     public static CommandData message(@Nonnull String name)
     {
-        return new CommandDataImpl(Command.Type.MESSAGE, name);
+        CommandDataImpl commandData = new CommandDataImpl(Command.Type.MESSAGE, name);
+        if (LanguageManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LanguageManager.INSTANCE);
+        return commandData;
     }
 
     /**
@@ -105,7 +112,10 @@ public class Commands
     @Nonnull
     public static CommandData user(@Nonnull String name)
     {
-        return new CommandDataImpl(Command.Type.USER, name);
+        CommandDataImpl commandData = new CommandDataImpl(Command.Type.USER, name);
+        if (LanguageManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LanguageManager.INSTANCE);
+        return commandData;
     }
 
     /**
@@ -126,7 +136,10 @@ public class Commands
     @Nonnull
     public static CommandData context(@Nonnull Command.Type type, @Nonnull String name)
     {
-        return new CommandDataImpl(type, name);
+        CommandDataImpl commandData = new CommandDataImpl(type, name);
+        if (LanguageManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LanguageManager.INSTANCE);
+        return commandData;
     }
 
 

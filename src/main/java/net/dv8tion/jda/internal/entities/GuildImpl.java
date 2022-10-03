@@ -17,6 +17,7 @@
 package net.dv8tion.jda.internal.entities;
 
 import dev.lexoland.jda.api.Holder;
+import dev.lexoland.jda.api.LanguageManager;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
@@ -83,6 +84,7 @@ import net.dv8tion.jda.internal.utils.cache.SortedSnowflakeCacheViewImpl;
 import net.dv8tion.jda.internal.utils.concurrent.task.GatewayTask;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -244,6 +246,13 @@ public class GuildImpl implements Guild
     public Holder getHolder() {
         return holder;
     }
+
+    @Override
+    public @NotNull String tl(@NotNull String key, Object... values) {
+        DiscordLocale locale = getLocale();
+        return LanguageManager.tl(locale, key, values);
+    }
+
     // Lexoland end
 
     @Nonnull
