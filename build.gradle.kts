@@ -337,7 +337,7 @@ class Version(
     }
 
     override fun toString(): String {
-        return "$major.$minor.$revision" + if (classifier != null) "-$classifier" else ""
+        return "$major.$minor.$revision-build." + System.getenv("BUILD_NUMBER") + if (classifier != null) "-$classifier" else ""
     }
 }
 
@@ -428,41 +428,8 @@ if (canSign) {
     }
 }
 
-// Staging and Promotion
-
-// This links the close/release tasks to the right repository (from the publication above)
-
-val ossrhConfigured = getProjectProperty("ossrhUser") != null
-val shouldPublish = isNewVersion && canSign && ossrhConfigured
-
-// Turn off the staging tasks if we don't want to publish
-
-// Getting staging profile is fine though
-
-//tasks.create("release") {
-//    // Only close repository after release is published
-//    val closeRepository by tasks
-//    closeRepository.mustRunAfter(tasks.withType<PublishToMavenRepository>())
-//    dependsOn(tasks.withType<PublishToMavenRepository>())
-//
-//    // Closes the sonatype repository and publishes to maven central
-//    val closeAndReleaseRepository: Task by tasks
-//    dependsOn(closeAndReleaseRepository)
-//
-//    // Builds all jars for publications
-//    dependsOn(build)
-//    enabled = shouldPublish
-//
-//    doLast { // Only runs when shouldPublish = true
-//        println("Saving version $versionObj to .version")
-//        val file = File(".version")
-//        file.createNewFile()
-//        file.writeText(versionObj.toString())
-//    }
-//}
-
 tasks.withType<PublishToMavenRepository> {
-    enabled = shouldPublish
+    enabled = true
 }
 
 // Gradle stop complaining please
