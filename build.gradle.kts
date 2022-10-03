@@ -19,10 +19,6 @@
 
 import Build_gradle.Pom
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
-import de.marcphilipp.gradle.nexus.NexusPublishExtension
-import io.codearte.gradle.nexus.BaseStagingTask
-import io.codearte.gradle.nexus.NexusStagingExtension
 import org.apache.tools.ant.filters.ReplaceTokens
 import java.time.Duration
 
@@ -34,8 +30,6 @@ plugins {
     `java-library`
     `maven-publish`
 
-    id("io.codearte.nexus-staging") version "0.30.0"
-    id("de.marcphilipp.nexus-publish") version "0.4.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -412,6 +406,17 @@ publishing {
             generatePom(pom)
         }
     }
+
+    repositories {
+        maven {
+            name = "tts-craft-releases"
+            url = uri("https://repo.tts-craft.de/releases")
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
 
 
@@ -425,66 +430,36 @@ if (canSign) {
 
 // Staging and Promotion
 
-configure<NexusStagingExtension> {
-    username = getProjectProperty("ossrhUser") ?: ""
-    password = getProjectProperty("ossrhPassword") ?: ""
-    stagingProfileId = getProjectProperty("stagingProfileId") ?: ""
-}
-
-configure<NexusPublishExtension> {
-    nexusPublishing {
-        repositories.sonatype {
-            username.set(getProjectProperty("ossrhUser") ?: "")
-            password.set(getProjectProperty("ossrhPassword") ?: "")
-            stagingProfileId.set(getProjectProperty("stagingProfileId") ?: "")
-        }
-        // Sonatype is very slow :)
-        connectTimeout.set(Duration.ofMinutes(1))
-        clientTimeout.set(Duration.ofMinutes(10))
-    }
-}
-
 // This links the close/release tasks to the right repository (from the publication above)
 
 val ossrhConfigured = getProjectProperty("ossrhUser") != null
 val shouldPublish = isNewVersion && canSign && ossrhConfigured
 
 // Turn off the staging tasks if we don't want to publish
-tasks.withType<InitializeNexusStagingRepository> {
-    enabled = shouldPublish
-}
-
-tasks.withType<BaseStagingTask> {
-    enabled = shouldPublish
-    // We give each step an hour because it takes very long sometimes ...
-    numberOfRetries = 30 // 30 tries
-    delayBetweenRetriesInMillis = 2 * 60 * 1000 // 2 minutes
-}
 
 // Getting staging profile is fine though
-tasks.getByName("getStagingProfile").enabled = ossrhConfigured
 
-tasks.create("release") {
-    // Only close repository after release is published
-    val closeRepository by tasks
-    closeRepository.mustRunAfter(tasks.withType<PublishToMavenRepository>())
-    dependsOn(tasks.withType<PublishToMavenRepository>())
-
-    // Closes the sonatype repository and publishes to maven central
-    val closeAndReleaseRepository: Task by tasks
-    dependsOn(closeAndReleaseRepository)
-
-    // Builds all jars for publications
-    dependsOn(build)
-    enabled = shouldPublish
-
-    doLast { // Only runs when shouldPublish = true
-        println("Saving version $versionObj to .version")
-        val file = File(".version")
-        file.createNewFile()
-        file.writeText(versionObj.toString())
-    }
-}
+//tasks.create("release") {
+//    // Only close repository after release is published
+//    val closeRepository by tasks
+//    closeRepository.mustRunAfter(tasks.withType<PublishToMavenRepository>())
+//    dependsOn(tasks.withType<PublishToMavenRepository>())
+//
+//    // Closes the sonatype repository and publishes to maven central
+//    val closeAndReleaseRepository: Task by tasks
+//    dependsOn(closeAndReleaseRepository)
+//
+//    // Builds all jars for publications
+//    dependsOn(build)
+//    enabled = shouldPublish
+//
+//    doLast { // Only runs when shouldPublish = true
+//        println("Saving version $versionObj to .version")
+//        val file = File(".version")
+//        file.createNewFile()
+//        file.writeText(versionObj.toString())
+//    }
+//}
 
 tasks.withType<PublishToMavenRepository> {
     enabled = shouldPublish
