@@ -11,4 +11,7 @@ public record LocalizationString(String key, Object... values) {
         return tl(locale, key, values);
     }
 
+    public static LocalizationString of(String key, Object... values) {
+        return new LocalizationString(key, values);
+    }
 }

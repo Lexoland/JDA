@@ -113,6 +113,8 @@ dependencies {
     //Collections Utility
     api("org.apache.commons:commons-collections4:4.4")
 
+    api("org.apache.commons:commons-lang3:3.12.0")
+
     //we use this only together with opus-java
     // if that dependency is excluded it also doesn't need jna anymore
     // since jna is a transitive runtime dependency of opus-java we don't include it explicitly as dependency
