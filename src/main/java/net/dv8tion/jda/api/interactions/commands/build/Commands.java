@@ -16,7 +16,6 @@
 
 package net.dv8tion.jda.api.interactions.commands.build;
 
-import dev.lexoland.jda.api.LocalizationManager;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.utils.data.DataArray;
 import net.dv8tion.jda.api.utils.data.DataObject;
@@ -72,10 +71,7 @@ public class Commands
     @Nonnull
     public static SlashCommandData slash(@Nonnull String name, @Nonnull String description)
     {
-        CommandDataImpl commandData = new CommandDataImpl(name, description);
-        if(LocalizationManager.INSTANCE != null)
-            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
-        return commandData;
+        return new CommandDataImpl(name, description);
     }
 
     /**
@@ -92,10 +88,7 @@ public class Commands
     @Nonnull
     public static CommandData message(@Nonnull String name)
     {
-        CommandDataImpl commandData = new CommandDataImpl(Command.Type.MESSAGE, name);
-        if (LocalizationManager.INSTANCE != null)
-            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
-        return commandData;
+        return new CommandDataImpl(Command.Type.MESSAGE, name);
     }
 
     /**
@@ -112,10 +105,7 @@ public class Commands
     @Nonnull
     public static CommandData user(@Nonnull String name)
     {
-        CommandDataImpl commandData = new CommandDataImpl(Command.Type.USER, name);
-        if (LocalizationManager.INSTANCE != null)
-            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
-        return commandData;
+        return new CommandDataImpl(Command.Type.USER, name);
     }
 
     /**
@@ -136,10 +126,7 @@ public class Commands
     @Nonnull
     public static CommandData context(@Nonnull Command.Type type, @Nonnull String name)
     {
-        CommandDataImpl commandData = new CommandDataImpl(type, name);
-        if (LocalizationManager.INSTANCE != null)
-            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
-        return commandData;
+        return new CommandDataImpl(type, name);
     }
 
 

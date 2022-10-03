@@ -1,5 +1,6 @@
 package dev.lexoland.jda.api.interaction.handler;
 
+import dev.lexoland.jda.api.LocalizationManager;
 import dev.lexoland.jda.api.interaction.executor.CommandExecutor;
 import dev.lexoland.jda.api.interaction.executor.ContextCommandExecutor;
 import dev.lexoland.jda.api.interaction.executor.SlashCommandExecutor;
@@ -10,8 +11,14 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -92,5 +99,55 @@ public class CommandHandler extends ListenerAdapter {
      */
     public CommandResponseHandler createResponseHandler(GenericCommandInteractionEvent event) {
         return responseHandlerFactory.apply(event);
+    }
+
+    /**
+     * Create a slash command builder.
+     *
+     * @param name        The command name, 1-32 lowercase alphanumeric characters
+     * @param description The command description, 1-100 characters
+     * @return {@link SlashCommandData} builder for slash commands
+     * @throws IllegalArgumentException If any of the following requirements are not met
+     *                                  <ul>
+     *                                      <li>The name must be lowercase alphanumeric (with dash), 1-32 characters long</li>
+     *                                      <li>The description must be 1-100 characters long</li>
+     *                                  </ul>
+     */
+    @Nonnull
+    public static SlashCommandData slash(@Nonnull String name, @Nonnull String description) {
+        SlashCommandData commandData = Commands.slash(name, description);
+        if (LocalizationManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
+        return commandData;
+    }
+
+    /**
+     * Create a message context menu command builder.
+     *
+     * @param name The command name, 1-32 characters
+     * @return {@link CommandData}
+     * @throws IllegalArgumentException If the name is not between 1-32 characters long
+     */
+    @Nonnull
+    public static CommandData message(@Nonnull String name) {
+        CommandData commandData = Commands.message(name);
+        if (LocalizationManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
+        return commandData;
+    }
+
+    /**
+     * Create a user context menu command builder.
+     *
+     * @param name The command name, 1-32 characters
+     * @return {@link CommandData}
+     * @throws IllegalArgumentException If the name is not between 1-32 characters long
+     */
+    @Nonnull
+    public static CommandData user(@Nonnull String name) {
+        CommandData commandData = Commands.user(name);
+        if (LocalizationManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
+        return commandData;
     }
 }
