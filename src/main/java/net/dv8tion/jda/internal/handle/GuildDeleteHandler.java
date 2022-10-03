@@ -71,6 +71,10 @@ public class GuildDeleteHandler extends SocketHandler
                     getJDA(), responseNumber,
                     guild));
         }
+        // Lexoland start
+        if (guild.getHolder() != null)
+            guild.getHolder().onDestruct();
+        // Lexoland end
         getJDA().getEventCache().clear(EventCache.Type.GUILD, id);
         return null;
     }

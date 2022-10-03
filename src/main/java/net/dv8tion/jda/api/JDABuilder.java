@@ -16,8 +16,10 @@
 package net.dv8tion.jda.api;
 
 import com.neovisionaries.ws.client.WebSocketFactory;
+import dev.lexoland.jda.api.Holder;
 import net.dv8tion.jda.api.audio.factory.IAudioSendFactory;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
@@ -43,6 +45,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -93,6 +96,7 @@ public class JDABuilder
     protected ChunkingFilter chunkingFilter = ChunkingFilter.ALL;
     protected MemberCachePolicy memberCachePolicy = MemberCachePolicy.ALL;
     protected GatewayEncoding encoding = GatewayEncoding.JSON;
+    protected Function<Guild, Holder> holderFactory = null;  // Lexoland
 
     private JDABuilder(@Nullable String token, int intents)
     {
@@ -475,6 +479,18 @@ public class JDABuilder
                 .setMemberCachePolicy(enableMembers ? MemberCachePolicy.ALL : MemberCachePolicy.DEFAULT)
                 .setDisabledCache(disabledCache);
     }
+
+    // Lexoland start
+    /**
+     * Sets the holder factory. Every holder is bound to a guild and its best use is to store data.
+     * @param factory The factory to use
+     * @return The JDABuilder instance. Useful for chaining.
+     */
+    public JDABuilder setHolder(Function<Guild, Holder> factory) {
+        this.holderFactory = factory;
+        return this;
+    }
+    // Lexoland end
 
     private JDABuilder setDisabledCache(EnumSet<CacheFlag> flags)
     {
@@ -1779,6 +1795,7 @@ public class JDABuilder
         MetaConfig metaConfig = new MetaConfig(maxBufferSize, contextMap, cacheFlags, flags);
 
         JDAImpl jda = new JDAImpl(authConfig, sessionConfig, threadingConfig, metaConfig);
+        jda.setHolderFactory(holderFactory);  // Lexoland
         jda.setMemberCachePolicy(memberCachePolicy);
         // We can only do member chunking with the GUILD_MEMBERS intent
         if ((intents & GatewayIntent.GUILD_MEMBERS.getRawValue()) == 0)

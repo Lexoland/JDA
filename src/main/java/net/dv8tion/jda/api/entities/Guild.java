@@ -15,6 +15,7 @@
  */
 package net.dv8tion.jda.api.entities;
 
+import dev.lexoland.jda.api.Holder;
 import net.dv8tion.jda.annotations.DeprecatedSince;
 import net.dv8tion.jda.annotations.ForRemoval;
 import net.dv8tion.jda.annotations.ReplaceWith;
@@ -95,6 +96,14 @@ public interface Guild extends IGuildChannelContainer, ISnowflake
     String SPLASH_URL = "https://cdn.discordapp.com/splashes/%s/%s.png";
     /** Template for {@link #getBannerUrl()}. */
     String BANNER_URL = "https://cdn.discordapp.com/banners/%s/%s.%s";
+
+    // Lexoland start
+    /**
+     * The holder of this guild instance.
+     * @return The holder or null if no holder factory is set.
+     */
+    Holder getHolder();
+    // Lexoland end
 
     /**
      * Retrieves the list of guild commands.

@@ -15,6 +15,7 @@
  */
 package net.dv8tion.jda.api.sharding;
 
+import dev.lexoland.jda.api.Holder;
 import gnu.trove.set.TIntSet;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -52,6 +53,7 @@ import java.util.EnumSet;
 import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 
 /**
@@ -146,6 +148,11 @@ public class DefaultShardManager implements ShardManager
      */
     protected final ChunkingFilter chunkingFilter;
 
+    /**
+     * The holder factory. Every holder is bound to a guild and its best use is to store data.
+     */
+    protected final Function<Guild, Holder> holderFactory; // Lexoland
+
     public DefaultShardManager(@Nonnull String token)
     {
         this(token, null);
@@ -153,7 +160,7 @@ public class DefaultShardManager implements ShardManager
 
     public DefaultShardManager(@Nonnull String token, @Nullable Collection<Integer> shardIds)
     {
-        this(token, shardIds, null, null, null, null, null, null, null);
+        this(token, shardIds, null, null, null, null, null, null, null, null);
     }
 
     public DefaultShardManager(
@@ -161,7 +168,7 @@ public class DefaultShardManager implements ShardManager
         @Nullable ShardingConfig shardingConfig, @Nullable EventConfig eventConfig,
         @Nullable PresenceProviderConfig presenceConfig, @Nullable ThreadingProviderConfig threadingConfig,
         @Nullable ShardingSessionConfig sessionConfig, @Nullable ShardingMetaConfig metaConfig,
-        @Nullable ChunkingFilter chunkingFilter)
+        @Nullable ChunkingFilter chunkingFilter, Function<Guild, Holder> holderFactory)
     {
         this.token = token;
         this.eventConfig = eventConfig == null ? EventConfig.getDefault() : eventConfig;
@@ -173,6 +180,7 @@ public class DefaultShardManager implements ShardManager
         this.chunkingFilter = chunkingFilter == null ? ChunkingFilter.ALL : chunkingFilter;
         this.executor = createExecutor(this.threadingConfig.getThreadFactory());
         this.shutdownHook = this.metaConfig.isUseShutdownHook() ? new Thread(this::shutdown, "JDA Shutdown Hook") : null;
+        this.holderFactory = holderFactory; // Lexoland
 
         synchronized (queue)
         {

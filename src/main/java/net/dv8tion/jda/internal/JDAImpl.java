@@ -17,6 +17,7 @@
 package net.dv8tion.jda.internal;
 
 import com.neovisionaries.ws.client.WebSocketFactory;
+import dev.lexoland.jda.api.Holder;
 import gnu.trove.set.TLongSet;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.GatewayEncoding;
@@ -96,6 +97,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class JDAImpl implements JDA
@@ -145,6 +147,8 @@ public class JDAImpl implements JDA
     protected ShardManager shardManager = null;
     protected MemberCachePolicy memberCachePolicy = MemberCachePolicy.ALL;
 
+    protected Function<Guild, Holder> holderFactory; // Lexoland
+
     public JDAImpl(AuthorizationConfig authConfig)
     {
         this(authConfig, null, null, null);
@@ -167,6 +171,16 @@ public class JDAImpl implements JDA
         this.eventCache = new EventCache();
         this.eventManager = new EventManagerProxy(new InterfacedEventManager(), this.threadConfig.getEventPool());
     }
+
+    // Lexoland start
+    public void setHolderFactory(Function<Guild, Holder> holderFactory) {
+        this.holderFactory = holderFactory;
+    }
+
+    public Holder createHolder(Guild guild) {
+        return holderFactory.apply(guild);
+    }
+    // Lexoland end
 
     public void handleEvent(@Nonnull GenericEvent event)
     {
@@ -360,6 +374,15 @@ public class JDAImpl implements JDA
 
     public void setStatus(Status status)
     {
+        // Lexoland start
+        if (status == Status.SHUTDOWN) {
+            for (Guild guild : getGuilds()) {
+                Holder holder = guild.getHolder();
+                if (holder != null)
+                    holder.onDestruct();
+            }
+        }
+        // Lexoland end
         //noinspection SynchronizeOnNonFinalField
         synchronized (this.status)
         {

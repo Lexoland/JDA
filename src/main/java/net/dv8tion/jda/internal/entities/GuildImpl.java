@@ -16,6 +16,7 @@
 
 package net.dv8tion.jda.internal.entities;
 
+import dev.lexoland.jda.api.Holder;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
@@ -140,6 +141,7 @@ public class GuildImpl implements Guild
     private DiscordLocale preferredLocale = DiscordLocale.ENGLISH_US;
     private int memberCount;
     private boolean boostProgressBarEnabled;
+    private Holder holder; // Lexoland
 
     public GuildImpl(JDAImpl api, long id)
     {
@@ -231,6 +233,18 @@ public class GuildImpl implements Guild
             });
         }
     }
+
+    // Lexoland start
+    public GuildImpl setHolder(Holder holder) {
+        this.holder = holder;
+        return this;
+    }
+
+    @Override
+    public Holder getHolder() {
+        return holder;
+    }
+    // Lexoland end
 
     @Nonnull
     @Override

@@ -16,6 +16,7 @@
 
 package net.dv8tion.jda.internal.entities;
 
+import dev.lexoland.jda.api.Holder;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import net.dv8tion.jda.api.JDA;
@@ -254,6 +255,7 @@ public class EntityBuilder
         final int explicitContentLevel = guildJson.getInt("explicit_content_filter", 0);
         final int nsfwLevel = guildJson.getInt("nsfw_level", -1);
         final boolean boostProgressBarEnabled = guildJson.getBoolean("premium_progress_bar_enabled");
+        final Holder holder = api.createHolder(guildObj); // Lexoland
 
         guildObj.setName(name)
                 .setIconId(iconId)
@@ -274,7 +276,8 @@ public class EntityBuilder
                 .setBoostTier(boostTier)
                 .setMemberCount(memberCount)
                 .setNSFWLevel(Guild.NSFWLevel.fromKey(nsfwLevel))
-                .setBoostProgressBarEnabled(boostProgressBarEnabled);
+                .setBoostProgressBarEnabled(boostProgressBarEnabled)
+                .setHolder(holder); // Lexoland
 
         SnowflakeCacheViewImpl<Guild> guildView = getJDA().getGuildsView();
         try (UnlockHook hook = guildView.writeLock())

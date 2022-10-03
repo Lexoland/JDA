@@ -16,6 +16,7 @@
 
 package net.dv8tion.jda.internal.handle;
 
+import dev.lexoland.jda.api.Holder;
 import gnu.trove.iterator.TLongIterator;
 import gnu.trove.iterator.TLongObjectIterator;
 import gnu.trove.map.TLongObjectMap;
@@ -376,6 +377,11 @@ public class GuildSetupNode
             break;
         }
         updateStatus(GuildSetupController.Status.READY);
+        // Lexoland start
+        Holder holder = guild.getHolder();
+        if (holder != null)
+            holder.onInitialized();
+        // Lexoland end
         GuildSetupController.log.debug("Finished setup for guild {} firing cached events {}", id, cachedEvents.size());
         api.getClient().handle(cachedEvents);
         api.getEventCache().playbackCache(EventCache.Type.GUILD, id);

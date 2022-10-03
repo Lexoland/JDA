@@ -28,6 +28,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.internal.requests.Route;
 import net.dv8tion.jda.internal.utils.message.MessageCreateBuilderMixin;
 import okhttp3.RequestBody;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -54,6 +55,19 @@ public class WebhookMessageCreateActionImpl<T>
     public MessageCreateBuilder getBuilder()
     {
         return builder;
+    }
+
+    @NotNull
+    @Override
+    public WebhookMessageCreateAction<T> setUsername(@Nullable String name) {
+
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public WebhookMessageCreateAction<T> setAvatarUrl(@Nullable String iconUrl) {
+        return this;
     }
 
     @Nonnull

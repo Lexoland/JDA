@@ -16,10 +16,12 @@
 package net.dv8tion.jda.api.sharding;
 
 import com.neovisionaries.ws.client.WebSocketFactory;
+import dev.lexoland.jda.api.Holder;
 import net.dv8tion.jda.api.GatewayEncoding;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.audio.factory.IAudioSendFactory;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.IEventManager;
@@ -43,6 +45,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
@@ -92,6 +95,7 @@ public class  DefaultShardManagerBuilder
     protected ThreadFactory threadFactory = null;
     protected ChunkingFilter chunkingFilter = ChunkingFilter.ALL;
     protected MemberCachePolicy memberCachePolicy = MemberCachePolicy.ALL;
+    protected Function<Guild, Holder> holderFactory = null;  // Lexoland
 
     protected DefaultShardManagerBuilder(@Nullable String token, int intents)
     {
@@ -473,6 +477,20 @@ public class  DefaultShardManagerBuilder
                 .setMemberCachePolicy(enableMembers ? MemberCachePolicy.ALL : MemberCachePolicy.DEFAULT)
                 .setDisabledCache(disabledCache);
     }
+
+
+    // Lexoland start
+
+    /**
+     * Sets the holder factory. Every holder is bound to a guild and its best use is to store data.
+     * @param factory The factory to use
+     * @return The DefaultShardManagerBuilder instance. Useful for chaining.
+     */
+    public DefaultShardManagerBuilder setHolderFactory(Function<Guild, Holder> factory) {
+        this.holderFactory = factory;
+        return this;
+    }
+    // Lexoland end
 
     private DefaultShardManagerBuilder setDisabledCache(EnumSet<CacheFlag> flags)
     {
@@ -2196,7 +2214,7 @@ public class  DefaultShardManagerBuilder
         final ThreadingProviderConfig threadingConfig = new ThreadingProviderConfig(rateLimitPoolProvider, gatewayPoolProvider, callbackPoolProvider, eventPoolProvider, audioPoolProvider, threadFactory);
         final ShardingSessionConfig sessionConfig = new ShardingSessionConfig(sessionController, voiceDispatchInterceptor, httpClient, httpClientBuilder, wsFactory, audioSendFactory, flags, shardingFlags, maxReconnectDelay, largeThreshold);
         final ShardingMetaConfig metaConfig = new ShardingMetaConfig(maxBufferSize, contextProvider, cacheFlags, flags, compression, encoding);
-        final DefaultShardManager manager = new DefaultShardManager(this.token, this.shards, shardingConfig, eventConfig, presenceConfig, threadingConfig, sessionConfig, metaConfig, chunkingFilter);
+        final DefaultShardManager manager = new DefaultShardManager(this.token, this.shards, shardingConfig, eventConfig, presenceConfig, threadingConfig, sessionConfig, metaConfig, chunkingFilter, holderFactory);
 
         if (login)
              manager.login();
