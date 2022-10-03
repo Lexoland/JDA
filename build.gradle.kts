@@ -62,7 +62,7 @@ val previousVersion: Version by lazy {
 
 val isNewVersion = previousVersion != versionObj
 // Use normal version string for new releases and commitHash for other builds
-project.version = "$versionObj" + if (isNewVersion) "" else "_$commitHash"
+project.version = "$versionObj"
 
 project.group = "dev.lexoland"
 
@@ -337,7 +337,7 @@ class Version(
     }
 
     override fun toString(): String {
-        return "$major.$minor.$revision-build." + System.getenv("BUILD_NUMBER") + if (classifier != null) "-$classifier" else ""
+        return "$major.$minor.$revision" + if (classifier != null) "-$classifier" else "" + "-build." + System.getenv("GITHUB_RUN_NUMBER")
     }
 }
 
