@@ -16,7 +16,7 @@
 
 package net.dv8tion.jda.internal.entities;
 
-import dev.lexoland.jda.api.Holder;
+import dev.lexoland.jda.api.holder.Holder;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import net.dv8tion.jda.api.JDA;

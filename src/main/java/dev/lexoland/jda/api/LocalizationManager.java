@@ -15,16 +15,16 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class LanguageManager implements LocalizationFunction {
+public class LocalizationManager implements LocalizationFunction {
 
     /**
-     * Used for commands. To localize responses or other messages use {@link LanguageManager#tl(DiscordLocale, String, Object...)}.
+     * Used for commands. To localize responses or other messages use {@link LocalizationManager#tl(DiscordLocale, String, Object...)}.
      */
     @ApiStatus.Internal
-    public static LanguageManager INSTANCE;
+    public static LocalizationManager INSTANCE;
 
     /**
-     * Initializes the {@link LanguageManager} with the given {@link DiscordLocale}s.
+     * Initializes the {@link LocalizationManager} with the given {@link DiscordLocale}s.
      * The first {@link DiscordLocale} will be the fallback language.<br>
      * This have to be called before registering any commands.
      * @param commandBundle The language bundle for commands
@@ -32,14 +32,14 @@ public class LanguageManager implements LocalizationFunction {
      * @param locales The {@link DiscordLocale}s to register
      */
     public static void init(String commandBundle, String generalBundle, DiscordLocale... locales) {
-        INSTANCE = new LanguageManager(commandBundle, generalBundle, locales);
+        INSTANCE = new LocalizationManager(commandBundle, generalBundle, locales);
     }
 
     private final List<Pair<DiscordLocale, ResourceBundle>> commandBundles;
     private final HashMap<DiscordLocale, ResourceBundle> generalBundles;
     private final DiscordLocale fallbackLocale;
 
-    public LanguageManager(String commandBundle, String generalBundle, DiscordLocale... locales) {
+    public LocalizationManager(String commandBundle, String generalBundle, DiscordLocale... locales) {
         Checks.notEmpty(locales, "locales");
         Checks.noneNull(locales, "locales");
         commandBundles = new ArrayList<>(locales.length);
@@ -74,7 +74,7 @@ public class LanguageManager implements LocalizationFunction {
      * @param locale The {@link DiscordLocale} to localize to
      * @param key The key to localize
      * @param values The values to insert into the localized string
-     * @throws IllegalStateException If the {@link dev.lexoland.jda.api.LanguageManager} is not initialized
+     * @throws IllegalStateException If the {@link LocalizationManager} is not initialized
      * @return The localized string
      */
     @NotNull

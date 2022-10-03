@@ -1,4 +1,4 @@
-package dev.lexoland.jda.api;
+package dev.lexoland.jda.api.holder;
 
 public interface Holder {
 

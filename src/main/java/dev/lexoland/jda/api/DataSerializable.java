@@ -1,4 +1,4 @@
-package dev.lexoland.jda.api.util;
+package dev.lexoland.jda.api;
 
 import net.dv8tion.jda.api.utils.data.DataObject;
 

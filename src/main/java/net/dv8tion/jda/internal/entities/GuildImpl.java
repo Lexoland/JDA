@@ -16,8 +16,8 @@
 
 package net.dv8tion.jda.internal.entities;
 
-import dev.lexoland.jda.api.Holder;
-import dev.lexoland.jda.api.LanguageManager;
+import dev.lexoland.jda.api.holder.Holder;
+import dev.lexoland.jda.api.LocalizationManager;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
@@ -250,7 +250,7 @@ public class GuildImpl implements Guild
     @Override
     public @NotNull String tl(@NotNull String key, Object... values) {
         DiscordLocale locale = getLocale();
-        return LanguageManager.tl(locale, key, values);
+        return LocalizationManager.tl(locale, key, values);
     }
 
     // Lexoland end

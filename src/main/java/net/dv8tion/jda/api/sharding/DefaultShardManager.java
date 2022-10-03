@@ -15,7 +15,7 @@
  */
 package net.dv8tion.jda.api.sharding;
 
-import dev.lexoland.jda.api.Holder;
+import dev.lexoland.jda.api.holder.Holder;
 import gnu.trove.set.TIntSet;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;

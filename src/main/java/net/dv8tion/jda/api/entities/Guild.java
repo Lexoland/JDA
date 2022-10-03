@@ -15,7 +15,8 @@
  */
 package net.dv8tion.jda.api.entities;
 
-import dev.lexoland.jda.api.Holder;
+import dev.lexoland.jda.api.LocalizationManager;
+import dev.lexoland.jda.api.holder.Holder;
 import net.dv8tion.jda.annotations.DeprecatedSince;
 import net.dv8tion.jda.annotations.ForRemoval;
 import net.dv8tion.jda.annotations.ReplaceWith;
@@ -109,7 +110,7 @@ public interface Guild extends IGuildChannelContainer, ISnowflake
      * Localizes the given key depending on the guild's locale. This localization defaults to {@link DiscordLocale#ENGLISH_US} if the guild is not a community server.
      * @param key The key to localize
      * @param values The values to replace in the localized string
-     * @throws IllegalStateException If the {@link dev.lexoland.jda.api.LanguageManager} is not initialized
+     * @throws IllegalStateException If the {@link LocalizationManager} is not initialized
      * @return The localized string
      */
     @NotNull

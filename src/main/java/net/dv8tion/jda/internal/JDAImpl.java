@@ -17,7 +17,7 @@
 package net.dv8tion.jda.internal;
 
 import com.neovisionaries.ws.client.WebSocketFactory;
-import dev.lexoland.jda.api.Holder;
+import dev.lexoland.jda.api.holder.Holder;
 import gnu.trove.set.TLongSet;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.GatewayEncoding;

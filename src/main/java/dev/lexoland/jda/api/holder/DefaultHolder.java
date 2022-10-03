@@ -1,6 +1,6 @@
-package dev.lexoland.jda.api;
+package dev.lexoland.jda.api.holder;
 
-import dev.lexoland.jda.api.util.DataSerializable;
+import dev.lexoland.jda.api.DataSerializable;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.utils.data.DataObject;
@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-public abstract class DataHolder implements Holder, DataSerializable {
+public abstract class DefaultHolder implements Holder, DataSerializable {
 
     private static final Logger LOGGER = JDALogger.getLog(JDA.class);
     private static final File GUILD_DIR = new File("guilds");
@@ -19,7 +19,7 @@ public abstract class DataHolder implements Holder, DataSerializable {
     protected final Guild guild;
     protected boolean dirty = false;
 
-    public DataHolder(Guild guild) {
+    public DefaultHolder(Guild guild) {
         this.guild = guild;
     }
 

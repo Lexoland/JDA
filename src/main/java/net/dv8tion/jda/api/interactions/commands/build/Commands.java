@@ -16,7 +16,7 @@
 
 package net.dv8tion.jda.api.interactions.commands.build;
 
-import dev.lexoland.jda.api.LanguageManager;
+import dev.lexoland.jda.api.LocalizationManager;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.utils.data.DataArray;
 import net.dv8tion.jda.api.utils.data.DataObject;
@@ -73,8 +73,8 @@ public class Commands
     public static SlashCommandData slash(@Nonnull String name, @Nonnull String description)
     {
         CommandDataImpl commandData = new CommandDataImpl(name, description);
-        if(LanguageManager.INSTANCE != null)
-            commandData.setLocalizationFunction(LanguageManager.INSTANCE);
+        if(LocalizationManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
         return commandData;
     }
 
@@ -93,8 +93,8 @@ public class Commands
     public static CommandData message(@Nonnull String name)
     {
         CommandDataImpl commandData = new CommandDataImpl(Command.Type.MESSAGE, name);
-        if (LanguageManager.INSTANCE != null)
-            commandData.setLocalizationFunction(LanguageManager.INSTANCE);
+        if (LocalizationManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
         return commandData;
     }
 
@@ -113,8 +113,8 @@ public class Commands
     public static CommandData user(@Nonnull String name)
     {
         CommandDataImpl commandData = new CommandDataImpl(Command.Type.USER, name);
-        if (LanguageManager.INSTANCE != null)
-            commandData.setLocalizationFunction(LanguageManager.INSTANCE);
+        if (LocalizationManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
         return commandData;
     }
 
@@ -137,8 +137,8 @@ public class Commands
     public static CommandData context(@Nonnull Command.Type type, @Nonnull String name)
     {
         CommandDataImpl commandData = new CommandDataImpl(type, name);
-        if (LanguageManager.INSTANCE != null)
-            commandData.setLocalizationFunction(LanguageManager.INSTANCE);
+        if (LocalizationManager.INSTANCE != null)
+            commandData.setLocalizationFunction(LocalizationManager.INSTANCE);
         return commandData;
     }
 
