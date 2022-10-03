@@ -16,6 +16,7 @@
 
 package net.dv8tion.jda.api.interactions.commands;
 
+import dev.lexoland.jda.api.interaction.CommandException;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import net.dv8tion.jda.api.JDA;
@@ -133,6 +134,22 @@ public class OptionMapping
     public String getAsString()
     {
         return data.getString("value");
+    }
+
+    /**
+     * The color representation of a String option.
+     *
+     * @return The rgb color value of this option value
+     * @throws IllegalStateException If this option {@link #getType() type} is not {@link OptionType#STRING}
+     * @throws NumberFormatException If the value is not a valid hex color
+     */
+    public int getAsColor() {
+        if (type != OptionType.STRING)
+            throw new IllegalStateException("Cannot convert option of type " + type + " to string (color)");
+        String hex = getAsString();
+        if (hex.startsWith("#"))
+            hex = hex.substring(1);
+        return Integer.parseInt(hex, 16);
     }
 
     /**
