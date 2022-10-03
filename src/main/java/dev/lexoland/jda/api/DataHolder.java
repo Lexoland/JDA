@@ -21,7 +21,16 @@ public abstract class DataHolder implements Holder, DataSerializable {
 
     public DataHolder(Guild guild) {
         this.guild = guild;
+    }
+
+    @Override
+    public void onInitialized() {
         fromJson(load());
+    }
+
+    @Override
+    public void onDestruct() {
+        saveIfDirty();
     }
 
     protected File getSaveFile() {
