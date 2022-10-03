@@ -232,7 +232,7 @@ tasks.withType<JavaCompile> {
     options.isIncremental = true
     if (javaVersion.isJava9Compatible) doFirst {
         arguments += "--release"
-        arguments += "8"
+        arguments += "17"
     }
     doFirst {
         options.compilerArgs = arguments
@@ -260,11 +260,11 @@ javadoc.apply {
         opt.author()
         opt.tags("incubating:a:Incubating:")
         opt.links(
-                "https://docs.oracle.com/javase/8/docs/api/",
+                "https://docs.oracle.com/javase/17/docs/api/",
                 "https://takahikokawasaki.github.io/nv-websocket-client/")
-        if (JavaVersion.VERSION_1_8 < javaVersion) {
+        if (JavaVersion.VERSION_17 < javaVersion) {
             opt.addBooleanOption("html5", true) // Adds search bar
-            opt.addStringOption("-release", "8")
+            opt.addStringOption("-release", "17")
         }
         // Fix for https://stackoverflow.com/questions/52326318/maven-javadoc-search-redirects-to-undefined-url
         if (javaVersion in JavaVersion.VERSION_11..JavaVersion.VERSION_12) {
