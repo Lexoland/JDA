@@ -337,7 +337,7 @@ class Version(
     }
 
     override fun toString(): String {
-        return "$major.$minor.$revision" + if (classifier != null) "-$classifier" else "" + "-build." + System.getenv("GITHUB_RUN_NUMBER")
+        return "$major.$minor.$revision" + (if (classifier != null) "-$classifier" else "") + "-build." + System.getenv("GITHUB_RUN_NUMBER")
     }
 }
 
