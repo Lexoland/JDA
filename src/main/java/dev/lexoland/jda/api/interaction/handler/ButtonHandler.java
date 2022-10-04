@@ -1,17 +1,40 @@
 package dev.lexoland.jda.api.interaction.handler;
 
+import dev.lexoland.jda.api.interaction.response.ButtonResponseHandler;
+import dev.lexoland.jda.api.interaction.response.CommandResponseHandler;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 /**
  * Handles a button interactions. To track button interactions, you have to annotate a method with {@link ButtonEvent} and register the class to the {@link net.dv8tion.jda.api.JDA} instance.
  */
 public class ButtonHandler {
+
+    private final Function<ButtonInteractionEvent, ButtonResponseHandler> responseHandlerFactory;
+
+    /**
+     * Creates a new button handler with a default response handler factory. These response handlers doesn't use logging channels. If you want to use logging channels, use {@link #ButtonHandler(Function)}.
+     */
+    public ButtonHandler() {
+        this(event -> new ButtonResponseHandler(event, null));
+    }
+
+    /**
+     * Creates a new button handler with a response handler factory. This can be used to set a custom response handler e.g. for logging channels.
+     *
+     * @param responseHandlerFactory The factory to create a response handler.
+     */
+    public ButtonHandler(Function<ButtonInteractionEvent, ButtonResponseHandler> responseHandlerFactory) {
+        this.responseHandlerFactory = responseHandlerFactory;
+    }
 
     @SubscribeEvent
     public void onButtonInteraction(@NotNull ButtonInteractionEvent e) {
@@ -29,11 +52,14 @@ public class ButtonHandler {
                 continue;
             if((!id.isEmpty() && !id.equals(e.getComponentId())) || (!regex.isEmpty() && !e.getComponentId().matches(regex)))
                 continue;
-            try {
-                method.invoke(this, e);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            ButtonResponseHandler re = responseHandlerFactory.apply(e);
+            re.catchExceptions(() -> {
+                try {
+                    method.invoke(this, e, re);
+                } catch (IllegalAccessException | InvocationTargetException ex) {
+                    ex.printStackTrace();
+                }
+            });
         }
     }
 
