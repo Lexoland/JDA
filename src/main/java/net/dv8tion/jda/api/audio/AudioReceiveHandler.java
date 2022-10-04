@@ -68,6 +68,10 @@ public interface AudioReceiveHandler
         return false;
     }
 
+    default boolean canReceiveUser(User user) {
+        return true;
+    }
+
     /**
      * If {@link #canReceiveEncoded()} returns true, JDA will provide raw {@link net.dv8tion.jda.api.audio.OpusPacket OpusPackets}
      * to this method <b>every 20 milliseconds</b>. These packets are for specific users rather than a combined packet

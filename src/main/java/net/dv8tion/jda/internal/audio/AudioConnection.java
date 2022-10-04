@@ -413,6 +413,9 @@ public class AudioConnection
                                 LOG.warn("Received audio data with a known SSRC, but the userId associate with the SSRC is unknown to JDA!");
                                 continue;
                             }
+                            if(!receiveHandler.canReceiveUser(user))
+                                continue;
+
                             short[] decodedAudio = opusPacket.decode();
                             //If decodedAudio is null, then the Opus decode failed, so throw away the packet.
                             if (decodedAudio == null)
