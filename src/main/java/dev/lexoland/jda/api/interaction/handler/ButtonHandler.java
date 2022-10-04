@@ -25,7 +25,7 @@ public class ButtonHandler {
             Env env = annotation.env();
             if(id.isEmpty() && regex.isEmpty())
                 throw new IllegalArgumentException("ButtonEvent annotation must have a value or a regex.");
-            if(env != Env.BOTH && (e.isFromGuild() && env == Env.DM || !e.isFromGuild() && env == Env.GUILD))
+            if(env != Env.BOTH && ((e.isFromGuild() && env == Env.DM) || (!e.isFromGuild() && env == Env.GUILD)))
                 continue;
             if((!id.isEmpty() && !id.equals(e.getComponentId())) || (!regex.isEmpty() && !e.getComponentId().matches(regex)))
                 continue;
