@@ -486,7 +486,7 @@ public class  DefaultShardManagerBuilder
      * @param factory The factory to use
      * @return The DefaultShardManagerBuilder instance. Useful for chaining.
      */
-    public DefaultShardManagerBuilder setHolderFactory(Function<Guild, Holder> factory) {
+    public DefaultShardManagerBuilder setHolder(Function<Guild, Holder> factory) {
         this.holderFactory = factory;
         return this;
     }
