@@ -1365,6 +1365,19 @@ public interface RestAction<T>
         }
     }
 
+    // Lexoland start
+    default ScheduledFuture<?> queueAfterFinally(long delay, @Nonnull TimeUnit unit, @Nonnull BiConsumer<? super T, Throwable> callback)
+    {
+        return queueAfter(delay, unit, v -> callback.accept(v, null), ex -> callback.accept(null, ex));
+    }
+
+    default void queueFinally(@Nonnull BiConsumer<? super T, Throwable> callback)
+    {
+        queue(v -> callback.accept(v, null), ex -> callback.accept(null, ex));
+    }
+    // Lexoland end
+
+
     /**
      * Schedules a call to {@link #queue()} to be executed after the specified {@code delay}.
      * <br>This is an <b>asynchronous</b> operation that will return a
