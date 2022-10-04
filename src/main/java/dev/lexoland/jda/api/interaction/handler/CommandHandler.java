@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -20,19 +21,31 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CommandHandler extends ListenerAdapter {
+/**
+ * Handles slash commands and context menus.
+ */
+public class CommandHandler {
 
     private final HashSet<CommandExecutor> commands = new HashSet<>();
     private final HashSet<CommandExecutor> globalCommands = new HashSet<>();
     private final Function<GenericCommandInteractionEvent, CommandResponseHandler> responseHandlerFactory;
 
+    /**
+     * Creates a new command handler with a default response handler factory. These response handlers doesn't use logging channels. If you want to use logging channels, use {@link #CommandHandler(Function)}.
+     */
     public CommandHandler() {
         this(event -> new CommandResponseHandler(event, null));
     }
 
+    /**
+     * Creates a new command handler with a response handler factory. This can be used to set a custom response handler e.g. for logging channels.
+     *
+     * @param responseHandlerFactory The factory to create a response handler.
+     */
     public CommandHandler(Function<GenericCommandInteractionEvent, CommandResponseHandler> responseHandlerFactory) {
         this.responseHandlerFactory = responseHandlerFactory;
     }
@@ -81,8 +94,8 @@ public class CommandHandler extends ListenerAdapter {
         );
     }
 
-    @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent e) {
+    @SubscribeEvent
+    private void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent e) {
         CommandResponseHandler responseHandler = createResponseHandler(e);
         responseHandler.catchExceptions(() -> {
             if(e.isGlobalCommand()) {
@@ -97,15 +110,15 @@ public class CommandHandler extends ListenerAdapter {
         });
     }
 
-    @Override
-    public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent e) {
+    @SubscribeEvent
+    private void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent e) {
         for (CommandExecutor command : commands)
             if (command instanceof SlashCommandExecutor slashCommand)
                 slashCommand.onCommandAutoCompleteInteraction(e).suggest(e);
     }
 
-    @Override
-    public void onGenericContextInteraction(@NotNull GenericContextInteractionEvent<?> e) {
+    @SubscribeEvent
+    private void onGenericContextInteraction(@NotNull GenericContextInteractionEvent<?> e) {
         CommandResponseHandler responseHandler = createResponseHandler(e);
         responseHandler.catchExceptions(() -> {
             for (CommandExecutor command : commands)

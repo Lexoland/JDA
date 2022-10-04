@@ -2,12 +2,11 @@ package dev.lexoland.jda.api.interaction.handler;
 
 import dev.lexoland.jda.api.LocalizationString;
 import dev.lexoland.jda.api.interaction.executor.ModalExecutor;
-import dev.lexoland.jda.api.interaction.response.CommandResponseHandler;
 import dev.lexoland.jda.api.interaction.response.ModalResponseHandler;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.internal.utils.tuple.Pair;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,22 +15,32 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.function.BiFunction;
 
-public class ModalHandler extends ListenerAdapter {
+/**
+ * Handles modal interactions. To use this api, you need to register it as a listener to your JDA instance.
+ */
+public class ModalHandler {
     @ApiStatus.Internal
     public static HashMap<String, Pair<ModalExecutor, LocalizationString>> modals = new HashMap<>();
 
     private final BiFunction<ModalInteractionEvent, LocalizationString, ModalResponseHandler> responseHandlerFactory;
 
+    /**
+     * Creates a new modal handler with a default response handler factory. These response handlers doesn't use logging channels. If you want to use logging channels, use {@link #ModalHandler(BiFunction)}.
+     */
     public ModalHandler() {
         this((event, title) -> new ModalResponseHandler(event, title, null));
     }
 
+    /**
+     * Creates a new modal handler with a response handler factory. This can be used to set a custom response handler e.g. for logging channels.
+     * @param responseHandlerFactory The factory to create a response handler.
+     */
     public ModalHandler(BiFunction<ModalInteractionEvent, LocalizationString, ModalResponseHandler> responseHandlerFactory) {
         this.responseHandlerFactory = responseHandlerFactory;
     }
 
-    @Override
-    public void onModalInteraction(@NotNull ModalInteractionEvent event) {
+    @SubscribeEvent
+    private void onModalInteraction(@NotNull ModalInteractionEvent event) {
         Pair<ModalExecutor, LocalizationString> executor = modals.get(event.getModalId());
         if(executor != null) {
             ModalResponseHandler responseHandler = createResponseHandler(event, executor.getRight());
