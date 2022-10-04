@@ -20,7 +20,11 @@ public class ButtonHandler {
             if (!method.isAnnotationPresent(ButtonEvent.class))
                 continue;
             ButtonEvent annotation = method.getAnnotation(ButtonEvent.class);
-            if (!annotation.id().equals(e.getComponentId()))
+            String id = annotation.value();
+            String regex = annotation.regex();
+            if(id.isEmpty() && regex.isEmpty())
+                throw new IllegalArgumentException("ButtonEvent annotation must have a value or a regex.");
+            if((!id.isEmpty() && !id.equals(e.getComponentId())) || (!regex.isEmpty() && !e.getComponentId().matches(regex)))
                 continue;
             try {
                 method.invoke(this, e);
@@ -32,6 +36,12 @@ public class ButtonHandler {
 
     @Retention(RetentionPolicy.RUNTIME)
     public @interface ButtonEvent {
-        String id();
+        /**
+         * The id of the button.
+         * @return The id
+         */
+        String value() default "";
+
+        String regex() default "";
     }
 }
