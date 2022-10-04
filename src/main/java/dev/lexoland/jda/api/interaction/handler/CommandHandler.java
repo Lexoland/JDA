@@ -5,17 +5,16 @@ import dev.lexoland.jda.api.interaction.executor.CommandExecutor;
 import dev.lexoland.jda.api.interaction.executor.ContextCommandExecutor;
 import dev.lexoland.jda.api.interaction.executor.SlashCommandExecutor;
 import dev.lexoland.jda.api.interaction.response.CommandResponseHandler;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 public class CommandHandler extends ListenerAdapter {
 
     private final HashSet<CommandExecutor> commands = new HashSet<>();
+    private final HashSet<CommandExecutor> globalCommands = new HashSet<>();
     private final Function<GenericCommandInteractionEvent, CommandResponseHandler> responseHandlerFactory;
 
     public CommandHandler() {
@@ -46,12 +46,33 @@ public class CommandHandler extends ListenerAdapter {
     }
 
     /**
+     * Registers a global command to the handler.
+     *
+     * @param command The command to register.
+     */
+    public void registerGlobal(CommandExecutor command) {
+        globalCommands.add(command);
+    }
+
+    /**
      * Updates all registered commands to the guild.
-     * @param guild The guild to update the commands to.
+     * @param guild The guild to update the commands to
      */
     public void updateCommands(Guild guild) {
         guild.updateCommands().addCommands(
                 commands.stream()
+                        .map(CommandExecutor::init)
+                        .collect(Collectors.toList())
+        ).queue();
+    }
+
+    /**
+     * Updates all registered global commands to the JDA instance.
+     * @param jda The JDA instance to update the commands to
+     */
+    public void updateGlobalCommands(JDA jda) {
+        jda.updateCommands().addCommands(
+                globalCommands.stream()
                         .map(CommandExecutor::init)
                         .collect(Collectors.toList())
         ).queue();
@@ -63,6 +84,9 @@ public class CommandHandler extends ListenerAdapter {
         responseHandler.catchExceptions(() -> {
             for (CommandExecutor command : commands)
                 if(command instanceof SlashCommandExecutor slashCommand)
+                    slashCommand.onSlashCommandInteraction(e, responseHandler);
+            for (CommandExecutor command : globalCommands)
+                if (command instanceof SlashCommandExecutor slashCommand)
                     slashCommand.onSlashCommandInteraction(e, responseHandler);
         });
     }
