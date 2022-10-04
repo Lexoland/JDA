@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -57,25 +58,27 @@ public class CommandHandler extends ListenerAdapter {
     /**
      * Updates all registered commands to the guild.
      * @param guild The guild to update the commands to
+     * @return The update action
      */
-    public void updateCommands(Guild guild) {
-        guild.updateCommands().addCommands(
+    public CommandListUpdateAction updateCommands(Guild guild) {
+        return guild.updateCommands().addCommands(
                 commands.stream()
                         .map(CommandExecutor::init)
                         .collect(Collectors.toList())
-        ).queue();
+        );
     }
 
     /**
      * Updates all registered global commands to the JDA instance.
      * @param jda The JDA instance to update the commands to
+     * @return The update action
      */
-    public void updateGlobalCommands(JDA jda) {
-        jda.updateCommands().addCommands(
+    public CommandListUpdateAction updateGlobalCommands(JDA jda) {
+        return jda.updateCommands().addCommands(
                 globalCommands.stream()
                         .map(CommandExecutor::init)
                         .collect(Collectors.toList())
-        ).queue();
+        );
     }
 
     @Override
