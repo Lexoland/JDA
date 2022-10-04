@@ -82,12 +82,15 @@ public class CommandHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent e) {
         CommandResponseHandler responseHandler = createResponseHandler(e);
         responseHandler.catchExceptions(() -> {
-            for (CommandExecutor command : commands)
-                if(command instanceof SlashCommandExecutor slashCommand)
-                    slashCommand.onSlashCommandInteraction(e, responseHandler);
-            for (CommandExecutor command : globalCommands)
-                if (command instanceof SlashCommandExecutor slashCommand)
-                    slashCommand.onSlashCommandInteraction(e, responseHandler);
+            if(e.isGlobalCommand()) {
+                for (CommandExecutor command : globalCommands)
+                    if (command instanceof SlashCommandExecutor slashCommand)
+                        slashCommand.onSlashCommandInteraction(e, responseHandler);
+            } else {
+                for (CommandExecutor command : commands)
+                    if (command instanceof SlashCommandExecutor slashCommand)
+                        slashCommand.onSlashCommandInteraction(e, responseHandler);
+            }
         });
     }
 
