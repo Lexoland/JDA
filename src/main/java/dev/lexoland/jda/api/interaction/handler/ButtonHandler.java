@@ -4,6 +4,7 @@ import dev.lexoland.jda.api.interaction.CommandException;
 import dev.lexoland.jda.api.interaction.response.ButtonResponseHandler;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import net.dv8tion.jda.internal.utils.tuple.MutableTriple;
 import net.dv8tion.jda.internal.utils.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,7 @@ import java.util.function.Function;
 public class ButtonHandler {
 
     private final Function<ButtonInteractionEvent, ButtonResponseHandler> responseHandlerFactory;
-    private final HashMap<String, Pair<Env, Method>> buttonInvokers = new HashMap<>();
+    private final HashMap<String, MutableTriple<Env, Method, Object>> buttonInvokers = new HashMap<>();
 
     /**
      * Creates a new button handler with a default response handler factory. These response handlers doesn't use logging channels. If you want to use logging channels, use {@link #ButtonHandler(Function)}.
@@ -38,33 +39,38 @@ public class ButtonHandler {
      */
     public ButtonHandler(Function<ButtonInteractionEvent, ButtonResponseHandler> responseHandlerFactory) {
         this.responseHandlerFactory = responseHandlerFactory;
-        initInvokers();
     }
 
-    private void initInvokers() {
-        Method[] declaredMethods = getClass().getDeclaredMethods();
+    public void register(Object object) {
+        initInvokers(object);
+    }
+
+    private void initInvokers(Object object) {
+        Method[] declaredMethods = object.getClass().getDeclaredMethods();
         for (Method method : declaredMethods) {
             if (!method.isAnnotationPresent(ButtonEvent.class))
                 continue;
             method.setAccessible(true);
             ButtonEvent annotation = method.getAnnotation(ButtonEvent.class);
-            buttonInvokers.put(annotation.value(), Pair.of(annotation.env(), method));
+            if(buttonInvokers.containsKey(annotation.value()))
+                throw new IllegalStateException("Button id '" + annotation.value() + "' is already registered!");
+            buttonInvokers.put(annotation.value(), MutableTriple.of(annotation.env(), method, object));
         }
     }
 
     @SubscribeEvent
     public void onButtonInteraction(@NotNull ButtonInteractionEvent e) {
-        Pair<Env, Method> pair = buttonInvokers.get(e.getComponentId());
+        MutableTriple<Env, Method, Object> pair = buttonInvokers.get(e.getComponentId());
         if(pair == null)
             return;
         Env env = pair.getLeft();
         if (env != Env.BOTH && ((e.isFromGuild() && env == Env.DM) || (!e.isFromGuild() && env == Env.GUILD)))
             return;
-        Method method = pair.getRight();
+        Method method = pair.getMiddle();
         ButtonResponseHandler re = responseHandlerFactory.apply(e);
         re.catchExceptions(() -> {
             try {
-                method.invoke(this, e, re);
+                method.invoke(pair.getRight(), e, re);
             } catch (IllegalAccessException ex) {
                 ex.printStackTrace();
             } catch (InvocationTargetException ex) {
