@@ -1,10 +1,10 @@
 package dev.lexoland.jda.api.interaction.handler;
 
+import dev.lexoland.jda.api.interaction.CommandException;
 import dev.lexoland.jda.api.interaction.response.ButtonResponseHandler;
-import dev.lexoland.jda.api.interaction.response.CommandResponseHandler;
-import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import net.dv8tion.jda.internal.utils.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.ElementType;
@@ -13,6 +13,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.function.Function;
 
 /**
@@ -21,6 +22,7 @@ import java.util.function.Function;
 public class ButtonHandler {
 
     private final Function<ButtonInteractionEvent, ButtonResponseHandler> responseHandlerFactory;
+    private final HashMap<String, Pair<Env, Method>> buttonInvokers = new HashMap<>();
 
     /**
      * Creates a new button handler with a default response handler factory. These response handlers doesn't use logging channels. If you want to use logging channels, use {@link #ButtonHandler(Function)}.
@@ -36,34 +38,42 @@ public class ButtonHandler {
      */
     public ButtonHandler(Function<ButtonInteractionEvent, ButtonResponseHandler> responseHandlerFactory) {
         this.responseHandlerFactory = responseHandlerFactory;
+        initInvokers();
     }
 
-    @SubscribeEvent
-    public void onButtonInteraction(@NotNull ButtonInteractionEvent e) {
+    private void initInvokers() {
         Method[] declaredMethods = getClass().getDeclaredMethods();
         for (Method method : declaredMethods) {
             if (!method.isAnnotationPresent(ButtonEvent.class))
                 continue;
+            method.setAccessible(true);
             ButtonEvent annotation = method.getAnnotation(ButtonEvent.class);
-            String id = annotation.value();
-            String regex = annotation.regex();
-            Env env = annotation.env();
-            if(id.isEmpty() && regex.isEmpty())
-                throw new IllegalArgumentException("ButtonEvent annotation must have a value or a regex.");
-            if(env != Env.BOTH && ((e.isFromGuild() && env == Env.DM) || (!e.isFromGuild() && env == Env.GUILD)))
-                continue;
-            if((!id.isEmpty() && !id.equals(e.getComponentId())) || (!regex.isEmpty() && !e.getComponentId().matches(regex)))
-                continue;
-            ButtonResponseHandler re = responseHandlerFactory.apply(e);
-            re.catchExceptions(() -> {
-                try {
-                    method.setAccessible(true);
-                    method.invoke(this, e, re);
-                } catch (IllegalAccessException | InvocationTargetException ex) {
-                    ex.printStackTrace();
-                }
-            });
+            buttonInvokers.put(annotation.value(), Pair.of(annotation.env(), method));
         }
+    }
+
+    @SubscribeEvent
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent e) {
+        Pair<Env, Method> pair = buttonInvokers.get(e.getComponentId());
+        if(pair == null)
+            return;
+        Env env = pair.getLeft();
+        if (env != Env.BOTH && ((e.isFromGuild() && env == Env.DM) || (!e.isFromGuild() && env == Env.GUILD)))
+            return;
+        Method method = pair.getRight();
+        ButtonResponseHandler re = responseHandlerFactory.apply(e);
+        re.catchExceptions(() -> {
+            try {
+                method.invoke(this, e, re);
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            } catch (InvocationTargetException ex) {
+                Throwable target = ex.getTargetException();
+                if (target instanceof CommandException ce)
+                    throw ce;
+                throw new RuntimeException(target);
+            }
+        });
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -71,11 +81,10 @@ public class ButtonHandler {
     public @interface ButtonEvent {
         /**
          * The id of the button.
+         *
          * @return The id
          */
-        String value() default "";
-
-        String regex() default "";
+        String value();
 
         Env env() default Env.BOTH;
     }

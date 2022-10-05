@@ -1,8 +1,8 @@
 package dev.lexoland.jda.api.interaction.handler;
 
 import dev.lexoland.jda.api.LocalizationManager;
+import dev.lexoland.jda.api.interaction.CommandException;
 import dev.lexoland.jda.api.interaction.executor.CommandExecutor;
-import dev.lexoland.jda.api.interaction.executor.ContextCommandExecutor;
 import dev.lexoland.jda.api.interaction.executor.SlashCommandExecutor;
 import dev.lexoland.jda.api.interaction.response.CommandResponseHandler;
 import net.dv8tion.jda.api.JDA;
@@ -16,9 +16,13 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import net.dv8tion.jda.internal.utils.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,6 +35,8 @@ public class CommandHandler {
     private final HashSet<CommandExecutor> commands = new HashSet<>();
     private final HashSet<CommandExecutor> globalCommands = new HashSet<>();
     private final Function<GenericCommandInteractionEvent, CommandResponseHandler> responseHandlerFactory;
+    private final HashMap<String, Pair<Method, CommandExecutor>> commandInvokers = new HashMap<>();
+    private final HashMap<String, Pair<Method, CommandExecutor>> globalCommandInvokers = new HashMap<>();
 
     /**
      * Creates a new command handler with a default response handler factory. These response handlers doesn't use logging channels. If you want to use logging channels, use {@link #CommandHandler(Function)}.
@@ -55,6 +61,7 @@ public class CommandHandler {
      */
     public void register(CommandExecutor command) {
         commands.add(command);
+        initInvokers(command, commandInvokers);
     }
 
     /**
@@ -64,6 +71,21 @@ public class CommandHandler {
      */
     public void registerGlobal(CommandExecutor command) {
         globalCommands.add(command);
+        initInvokers(command, globalCommandInvokers);
+    }
+
+    private void initInvokers(CommandExecutor command, HashMap<String, Pair<Method, CommandExecutor>> map) {
+        Method[] declaredMethods = command.getClass().getDeclaredMethods();
+        for (Method method : declaredMethods) {
+            if (!method.isAnnotationPresent(CommandExecutor.CommandEvent.class))
+                continue;
+            method.setAccessible(true);
+            SlashCommandExecutor.CommandEvent annotation = method.getAnnotation(CommandExecutor.CommandEvent.class);
+            String path = annotation.value();
+            if(map.containsKey(path))
+                throw new IllegalArgumentException("Command path '" + path + "' is already registered!");
+            map.put(path, Pair.of(method, command));
+        }
     }
 
     /**
@@ -94,34 +116,38 @@ public class CommandHandler {
 
     @SubscribeEvent
     private void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent e) {
-        CommandResponseHandler responseHandler = createResponseHandler(e);
-        responseHandler.catchExceptions(() -> {
-            if(e.isGlobalCommand()) {
-                for (CommandExecutor command : globalCommands)
-                    if (command instanceof SlashCommandExecutor slashCommand)
-                        slashCommand.onSlashCommandInteraction(e, responseHandler);
-            } else {
-                for (CommandExecutor command : commands)
-                    if (command instanceof SlashCommandExecutor slashCommand)
-                        slashCommand.onSlashCommandInteraction(e, responseHandler);
-            }
-        });
-    }
-
-    @SubscribeEvent
-    private void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent e) {
-        for (CommandExecutor command : commands)
-            if (command instanceof SlashCommandExecutor slashCommand)
-                slashCommand.onCommandAutoCompleteInteraction(e).suggest(e);
+        onGenericCommandInteraction(e);
     }
 
     @SubscribeEvent
     private void onGenericContextInteraction(@NotNull GenericContextInteractionEvent<?> e) {
+        onGenericCommandInteraction(e);
+    }
+
+    @SubscribeEvent
+    private void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent e) {
+        for (CommandExecutor command : e.isGlobalCommand() ? globalCommands : commands)
+            if (command instanceof SlashCommandExecutor slashCommand)
+                slashCommand.onCommandAutoCompleteInteraction(e).suggest(e);
+    }
+
+    private void onGenericCommandInteraction(GenericCommandInteractionEvent e) {
+        Pair<Method, CommandExecutor> pair = (e.isGlobalCommand() ? globalCommandInvokers : commandInvokers).get(e.getCommandPath());
+        if (pair == null)
+            return;
         CommandResponseHandler responseHandler = createResponseHandler(e);
         responseHandler.catchExceptions(() -> {
-            for (CommandExecutor command : commands)
-                if (command instanceof ContextCommandExecutor contextCommand)
-                    contextCommand.onContextInteraction(e, responseHandler);
+            Method method = pair.getLeft();
+            try {
+                method.invoke(pair.getRight(), e, responseHandler);
+            } catch (IllegalAccessException ex) {
+                throw new RuntimeException(ex);
+            } catch (InvocationTargetException ex) {
+                Throwable target = ex.getTargetException();
+                if (target instanceof CommandException ce)
+                    throw ce;
+                throw new RuntimeException(target);
+            }
         });
     }
 
