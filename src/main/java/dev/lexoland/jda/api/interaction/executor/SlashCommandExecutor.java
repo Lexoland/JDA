@@ -1,7 +1,6 @@
 package dev.lexoland.jda.api.interaction.executor;
 
 import dev.lexoland.jda.api.interaction.AutoCompleteHandler;
-import dev.lexoland.jda.api.interaction.handler.ButtonHandler;
 import dev.lexoland.jda.api.interaction.response.CommandResponseHandler;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -28,6 +27,7 @@ public interface SlashCommandExecutor extends CommandExecutor {
             if(!path.equals(e.getCommandPath()))
                 continue;
             try {
+                method.setAccessible(true);
                 method.invoke(this, e, re);
             } catch (IllegalAccessException | InvocationTargetException ex) {
                 ex.printStackTrace();

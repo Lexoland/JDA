@@ -57,6 +57,7 @@ public class ButtonHandler {
             ButtonResponseHandler re = responseHandlerFactory.apply(e);
             re.catchExceptions(() -> {
                 try {
+                    method.setAccessible(true);
                     method.invoke(this, e, re);
                 } catch (IllegalAccessException | InvocationTargetException ex) {
                     ex.printStackTrace();
