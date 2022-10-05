@@ -7,8 +7,10 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
@@ -64,6 +66,7 @@ public class ButtonHandler {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
     public @interface ButtonEvent {
         /**
          * The id of the button.
