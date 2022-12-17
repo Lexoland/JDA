@@ -38,7 +38,11 @@ public abstract class DefaultHolder implements Holder, DataSerializable {
     }
 
     protected DataObject load() {
-        try (FileInputStream in = new FileInputStream(getSaveFile())) {
+        File file = getSaveFile();
+        if (!file.exists())
+            return DataObject.empty();
+
+        try (FileInputStream in = new FileInputStream(file)) {
             return DataObject.fromJson(in);
         } catch (Exception e) {
             LOGGER.error("Failed to load guild '" + guild.getId() + "'", e);
@@ -47,6 +51,8 @@ public abstract class DefaultHolder implements Holder, DataSerializable {
     }
 
     public void save() {
+        GUILD_DIR.mkdirs();
+
         try (FileOutputStream out = new FileOutputStream(getSaveFile())) {
             out.write(toJson().toJson());
             dirty = false;
