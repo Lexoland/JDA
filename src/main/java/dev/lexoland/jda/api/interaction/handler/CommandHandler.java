@@ -132,7 +132,7 @@ public class CommandHandler {
     }
 
     private void onGenericCommandInteraction(GenericCommandInteractionEvent e) {
-        Pair<Method, CommandExecutor> pair = (e.isGlobalCommand() ? globalCommandInvokers : commandInvokers).get(e.getCommandPath());
+        Pair<Method, CommandExecutor> pair = (e.isGlobalCommand() ? globalCommandInvokers : commandInvokers).get(e.getFullCommandName());
         if (pair == null)
             return;
         CommandResponseHandler responseHandler = createResponseHandler(e);
