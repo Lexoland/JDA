@@ -69,8 +69,8 @@ project.group = "dev.lexoland"
 val archivesBaseName = "JDA"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_18
-    targetCompatibility = JavaVersion.VERSION_18
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 configure<SourceSetContainer> {
@@ -232,7 +232,7 @@ tasks.withType<JavaCompile> {
     options.isIncremental = true
     if (javaVersion.isJava9Compatible) doFirst {
         arguments += "--release"
-        arguments += "18"
+        arguments += "17"
     }
     doFirst {
         options.compilerArgs = arguments
@@ -260,13 +260,13 @@ javadoc.apply {
         opt.author()
         opt.tags("incubating:a:Incubating:")
         opt.links(
-                "https://docs.oracle.com/javase/18/docs/api/",
+                "https://docs.oracle.com/javase/17/docs/api/",
                 "https://takahikokawasaki.github.io/nv-websocket-client/")
-        if (JavaVersion.VERSION_18 < javaVersion) {
+        if (JavaVersion.VERSION_17 < javaVersion) {
             opt.addBooleanOption("html5", true) // Adds search bar
-            opt.addStringOption("-release", "18")
+            opt.addStringOption("-release", "17")
         }
-        // Fix for https://stackoverflow.com/questions/52326318/maven-javadoc-search-redirects-to-undefined-url
+        // Fix for https://stackoverflow.com/questions/52326317/maven-javadoc-search-redirects-to-undefined-url
         if (javaVersion in JavaVersion.VERSION_11..JavaVersion.VERSION_12) {
             opt.addBooleanOption("-no-module-directories", true)
         }
