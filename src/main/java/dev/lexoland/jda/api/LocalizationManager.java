@@ -87,7 +87,9 @@ public class LocalizationManager implements LocalizationFunction {
         try {
             return bundle.getString(key).formatted(values);
         } catch (MissingResourceException e) {
-            return key;
+            if (locale == INSTANCE.fallbackLocale)
+                return key;
+            return tl(INSTANCE.fallbackLocale, key, values);
         }
     }
 }
