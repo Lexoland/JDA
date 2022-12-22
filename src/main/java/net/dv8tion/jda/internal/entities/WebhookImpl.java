@@ -253,6 +253,12 @@ public class WebhookImpl extends AbstractWebhookClient<Void> implements Webhook
     // TODO: Implement WebhookMessage
 
     @Override
+    public WebhookClient<Void> getClient()
+    {
+        return this;
+    }
+
+    @Override
     public WebhookMessageCreateActionImpl<Void> sendRequest()
     {
         checkToken();

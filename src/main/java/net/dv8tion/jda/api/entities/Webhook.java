@@ -300,6 +300,14 @@ public interface Webhook extends ISnowflake
     WebhookManager getManager();
 
     /**
+     * The webhook client for this webhook.
+     * <br>This client can be used to send messages to this webhook.
+     *
+     * @return The webhook client for this webhook
+     */
+    WebhookClient<Void> getClient();
+
+    /**
      * Partial Webhook which can be {@link #resolve() resolved} to a {@link Webhook}.
      *
      * @see #resolve()

@@ -44,6 +44,8 @@ public class WebhookMessageCreateActionImpl<T>
     private final Function<DataObject, T> transformer;
 
     private boolean ephemeral;
+    private String username;
+    private String avatarUrl;
 
     public WebhookMessageCreateActionImpl(JDA api, Route.CompiledRoute route, Function<DataObject, T> transformer)
     {
@@ -60,13 +62,14 @@ public class WebhookMessageCreateActionImpl<T>
     @NotNull
     @Override
     public WebhookMessageCreateAction<T> setUsername(@Nullable String name) {
-
+        this.username = name;
         return this;
     }
 
     @NotNull
     @Override
     public WebhookMessageCreateAction<T> setAvatarUrl(@Nullable String iconUrl) {
+        this.avatarUrl = iconUrl;
         return this;
     }
 
@@ -87,6 +90,10 @@ public class WebhookMessageCreateActionImpl<T>
             DataObject json = data.toData();
             if (ephemeral)
                 json.put("flags", json.getInt("flags", 0) | MessageFlag.EPHEMERAL.getValue());
+            if (username != null)
+                json.put("username", username);
+            if (avatarUrl != null)
+                json.put("avatar_url", avatarUrl);
 
             return getMultipartBody(files, json);
         }
