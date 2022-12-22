@@ -51,9 +51,12 @@ public abstract class DefaultHolder implements Holder, DataSerializable {
     }
 
     public void save() {
-        GUILD_DIR.mkdirs();
+        File file = getSaveFile();
+        File parent = file.getParentFile();
+        if (!parent.exists())
+            parent.mkdirs();
 
-        try (FileOutputStream out = new FileOutputStream(getSaveFile())) {
+        try (FileOutputStream out = new FileOutputStream(file)) {
             out.write(toJson().toJson());
             dirty = false;
         } catch (Exception e) {
