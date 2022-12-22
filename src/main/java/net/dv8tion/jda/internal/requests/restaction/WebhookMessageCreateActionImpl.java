@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
@@ -102,7 +103,13 @@ public class WebhookMessageCreateActionImpl<T>
     @Override
     protected void handleSuccess(Response response, Request<T> request)
     {
-        T message = transformer.apply(response.getObject());
+        Optional<DataObject> object = response.optObject();
+        if (object.isEmpty()) {
+            request.onSuccess(null);
+            return;
+        }
+
+        T message = transformer.apply(object.get());
         request.onSuccess(message);
     }
 
