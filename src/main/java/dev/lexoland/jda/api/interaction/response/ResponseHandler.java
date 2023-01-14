@@ -1,5 +1,6 @@
 package dev.lexoland.jda.api.interaction.response;
 
+import dev.lexoland.jda.api.API;
 import dev.lexoland.jda.api.interaction.CommandException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -132,6 +133,7 @@ public abstract class ResponseHandler {
                     .setEphemeral(true)
                     .queue();
         } catch (Exception ex) {
+            API.LOGGER.error("An error occurred while executing a interaction", ex);
             String exception = ExceptionUtils.getStackTrace(ex);
             if (exception.length() > 4000)
                 exception = exception.substring(0, 4000) + "...";
