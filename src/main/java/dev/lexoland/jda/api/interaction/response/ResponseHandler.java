@@ -133,7 +133,7 @@ public abstract class ResponseHandler {
                     .setEphemeral(true)
                     .queue();
         } catch (Exception ex) {
-            API.LOGGER.error("An error occurred while executing a interaction", ex);
+            API.LOGGER.error("An error occurred while executing an interaction", ex);
             String exception = ExceptionUtils.getStackTrace(ex);
             if (exception.length() > 4000)
                 exception = exception.substring(0, 4000) + "...";
